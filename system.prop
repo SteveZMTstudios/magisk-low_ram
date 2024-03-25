@@ -1,0 +1,7 @@
+# This line was modified by Magisk module “lowramenabler”, 
+# edit from zip install file but not from
+# “build.prop”.
+
+ro.config.low_ram=true
+
+# modify end.
