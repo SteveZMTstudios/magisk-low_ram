@@ -2,6 +2,66 @@
 # edit from zip install file but not from
 # “build.prop”.
 
+##### Android Go Part
+# enable Android Go, require API 21+.
+# very break ui, but works fine at 27.
 ro.config.low_ram=true
 
+# auto recycle useless mem, for low mem device, make background app FC.
+persist.sys.purgeable_assets=1
+##### Part End
+
+# enable Graphic draw (test)
+persist.sys.gpu.optimization=1
+
+# enable quick poweron (test)
+ro.config.hw_quickpoweron=true
+
+# enable hibernate (test)
+persist.sys.shutdown.mode=hibernate
+
+# pause cached process (test, may not work)
+persist.sys.tombstone=1
+
+# lock cache by surfaceflinger when no signal (test)
+# https://source.android.google.cn/docs/core/graphics/unsignaled-buffer-latch
+# WARNING! it may froze screen, if you get any problem, descript it at first.
+# FORCE VERSION
+# debug.sf.latch_unsignaled=1
+# this line was demanded by customize.sh
+
+# Auto version (default)
+# debug.sf.auto_latch_unsignaled=true
+
+# Reduce the number of background processes
+ro.config.max_starting_bg=2
+
+# Disable error checking to improve performance
+#ro.kernel.android.checkjni=0
+
+# Disable boot animation for faster startup
+# debug.sf.nobootanimation=1
+
+# Disable sending usage data
+ro.config.nocheckin=1
+
+# Enable JIT compiler for Dalvik VM
+#dalvik.vm.execution-mode=int:jit
+
+# Increase the heap size for better performance
+#dalvik.vm.heapsize=256m
+
+debug.sf.hw=1
+video.accelerate.hw=1
+debug.composition.type=dyn
+
+# More RAM 
+#persist.sys.purgeable_assets=1 
+persist.service.pcsync.enable=0 
+persist.service.lgospd.enable=0
+#Hardware Power Saving
+ro.config.hw_power_saving=1
+
 # modify end.
+# CC BY-NC-SA License ,Author: SteveZMTstudios
+
