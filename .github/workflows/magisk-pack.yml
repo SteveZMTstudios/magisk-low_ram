@@ -1,58 +1,58 @@
 name: Package and Release
 
 on:
-    workflow_dispatch:
-        inputs:
-            release_type:
-                description: 'Release type (pre-release or latest)'
-                required: true
-                default: 'latest'
-                type: choice
-                options:
-                    - pre-release
-                    - latest
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type (pre-release or latest)'
+        required: true
+        default: 'latest'
+        type: choice
+        options:
+          - pre-release
+          - latest
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-        - name: Set up Python
-          uses: actions/setup-python@v2
-            with:
-                python-version: '3.x'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-        - name: Install zip
-          run: sudo apt-get install zip -y
+    - name: Install zip
+      run: sudo apt-get install zip -y
 
-        - name: Read version from module.prop
-          id: get_version
-          run: |
-                version=$(grep 'version=' module.prop | cut -d'=' -f2)
-                version_code=$(grep 'versionCode=' module.prop | cut -d'=' -f2)
-                echo "::set-output name=version::$version"
-                echo "::set-output name=version_code::$version_code"
+    - name: Read version from module.prop
+      id: get_version
+      run: |
+        version=$(grep 'version=' module.prop | cut -d'=' -f2)
+        version_code=$(grep 'versionCode=' module.prop | cut -d'=' -f2)
+        echo "::set-output name=version::$version"
+        echo "::set-output name=version_code::$version_code"
 
-        - name: Create ZIP package
-          run: zip -r package.zip .
+    - name: Create ZIP package
+      run: zip -r package.zip .
 
-        - name: Get commit messages
-          id: get_commits
-            run: |
-                commits=$(git log --pretty=format:"%h - %s" --no-merges)
-                echo "::set-output name=commits::$commits"
+    - name: Get commit messages
+      id: get_commits
+      run: |
+        commits=$(git log --pretty=format:"%h - %s" --no-merges)
+        echo "::set-output name=commits::$commits"
 
-        - name: Create GitHub Release
-          uses: actions/create-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-                tag_name: v${{ steps.get_version.outputs.version_code }}
-                release_name: v${{ steps.get_version.outputs.version }}
-                body: ${{ steps.get_commits.outputs.commits }}
-                draft: false
-                prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
-                files: package.zip
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.get_version.outputs.version_code }}
+        release_name: v${{ steps.get_version.outputs.version }}
+        body: ${{ steps.get_commits.outputs.commits }}
+        draft: false
+        prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
+        files: package.zip
