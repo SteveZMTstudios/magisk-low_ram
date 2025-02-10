@@ -36,7 +36,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version_code }}
           name: Version ${{ steps.version.outputs.version }} (Code ${{ steps.version.outputs.version_code }})
           body: initial release, check the commit messages for more details
           prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
