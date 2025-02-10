@@ -1,58 +1,54 @@
-name: Package and Release
+name: Build Magisk Module
 
 on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'Release type (pre-release or latest)'
+        description: 'Release Type'
         required: true
-        default: 'latest'
+        default: 'pre-release'
         type: choice
         options:
-          - pre-release
-          - latest
+          - 'pre-release'
+          - 'latest'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Get version info
+        id: version
+        run: |
+          version=$(grep "version=" module.prop | cut -d= -f2)
+          versionCode=$(grep "versionCode=" module.prop | cut -d= -f2)
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version_code=$versionCode" >> $GITHUB_OUTPUT
 
-    - name: Install zip
-      run: sudo apt-get install zip -y
+      - name: Get commit messages
+        id: commits
+        run: |
+          COMMITS=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~10)..HEAD)
+          echo "messages<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-    - name: Read version from module.prop
-      id: get_version
-      run: |
-        version=$(grep 'version=' module.prop | cut -d'=' -f2)
-        version_code=$(grep 'versionCode=' module.prop | cut -d'=' -f2)
-        echo "version=$version" >> $GITHUB_ENV
-        echo "version_code=$version_code" >> $GITHUB_ENV
+      - name: Create release ZIP
+        run: |
+          zip -r magisk-module-v${{ steps.version.outputs.version }}.zip * -x ".git/*" ".github/*" "README.md"
 
-    - name: Create ZIP package
-      run: zip -r package.zip .
-
-    - name: Get commit messages
-      id: get_commits
-      run: |
-        commits=$(git log --pretty=format:"%h - %s" --no-merges)
-        echo "commits=$commits" >> $GITHUB_ENV
-
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.get_version.outputs.version_code }}
-        release_name: v${{ steps.get_version.outputs.version }}
-        body: ${{ steps.get_commits.outputs.commits }}
-        draft: false
-        prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
-        files: package.zip
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Version ${{ steps.version.outputs.version }} (Code ${{ steps.version.outputs.version_code }})
+          body: ${{ steps.commits.outputs.messages }}
+          prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
+          draft: false
+          files: magisk-module-v${{ steps.version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
