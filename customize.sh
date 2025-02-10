@@ -51,7 +51,7 @@ if [ -f "/data/local/tmp/enable" ];then
     echo "ro.kernel.checkjni=0" >> $MODPATH/system.prop
     echo "ro.kernel.android.checkjni=0" >> $MODPATH/system.prop
     echo "persist.sys.use_dithering=0" >> $MODPATH/system.prop
-    echo "persist.sys.purgeable_assets=1" >> $MODPATH/system.prop
+#    echo "persist.sys.purgeable_assets=1" >> $MODPATH/system.prop
     echo "dalvik.vm.execution-mode=int:jit" >> $MODPATH/system.prop
     rm /data/local/tmp/enable
   else

@@ -34,7 +34,7 @@ persist.sys.tombstone=1
 # debug.sf.auto_latch_unsignaled=true
 
 # Reduce the number of background processes
-ro.config.max_starting_bg=2
+ro.config.max_starting_bg=8
 
 # Disable error checking to improve performance
 #ro.kernel.android.checkjni=0
