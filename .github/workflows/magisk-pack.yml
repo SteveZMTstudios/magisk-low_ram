@@ -27,7 +27,7 @@ jobs:
       - name: Get version info
         id: version
         run: |
-          version=$(grep "version=" module.prop | cut -d= -f2)
+          version=$(grep "version=" module.prop | cut -d= -f2 | tr ' ' '-')
           versionCode=$(grep "versionCode=" module.prop | cut -d= -f2)
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "version_code=$versionCode" >> $GITHUB_OUTPUT
