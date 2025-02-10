@@ -1,53 +1,58 @@
-name: Package and Release Magisk Module
+name: Package and Release
 
 on:
     workflow_dispatch:
         inputs:
             release_type:
-                description: 'Release Type'
+                description: 'Release type (pre-release or latest)'
                 required: true
                 default: 'latest'
                 type: choice
                 options:
+                    - pre-release
                     - latest
-                    - prerelease
 
 jobs:
     build:
         runs-on: ubuntu-latest
+
         steps:
-            - uses: actions/checkout@v3
-                with:
-                    fetch-depth: 0
+        - name: Checkout repository
+            uses: actions/checkout@v2
 
-            - name: Read module info
-                id: module_info
-                run: |
-                    VERSION=$(grep "version=" module.prop | cut -d= -f2)
-                    VERSION_CODE=$(grep "versionCode=" module.prop | cut -d= -f2)
-                    echo "version=$VERSION" >> $GITHUB_OUTPUT
-                    echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        - name: Set up Python
+            uses: actions/setup-python@v2
+            with:
+                python-version: '3.x'
 
-            - name: Generate changelog
-                id: changelog
-                run: |
-                    CHANGELOG=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~10)..HEAD)
-                    echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-                    echo "$CHANGELOG" >> $GITHUB_OUTPUT
-                    echo "EOF" >> $GITHUB_OUTPUT
+        - name: Install zip
+            run: sudo apt-get install zip -y
 
-            - name: Create ZIP package
-                run: |
-                    zip -r magisk-module.zip * -x ".git/*" ".github/*" "README.md" "LICENSE"
+        - name: Read version from module.prop
+            id: get_version
+            run: |
+                version=$(grep 'version=' module.prop | cut -d'=' -f2)
+                version_code=$(grep 'versionCode=' module.prop | cut -d'=' -f2)
+                echo "::set-output name=version::$version"
+                echo "::set-output name=version_code::$version_code"
 
-            - name: Create Release
-                uses: softprops/action-gh-release@v1
-                with:
-                    tag_name: v${{ steps.module_info.outputs.version }}
-                    name: Release v${{ steps.module_info.outputs.version }} (Build ${{ steps.module_info.outputs.version_code }})
-                    body: ${{ steps.changelog.outputs.CHANGELOG }}
-                    files: magisk-module.zip
-                    prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
-                    draft: false
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Create ZIP package
+            run: zip -r package.zip .
+
+        - name: Get commit messages
+            id: get_commits
+            run: |
+                commits=$(git log --pretty=format:"%h - %s" --no-merges)
+                echo "::set-output name=commits::$commits"
+
+        - name: Create GitHub Release
+            uses: actions/create-release@v1
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                tag_name: v${{ steps.get_version.outputs.version_code }}
+                release_name: v${{ steps.get_version.outputs.version }}
+                body: ${{ steps.get_commits.outputs.commits }}
+                draft: false
+                prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
+                files: package.zip
