@@ -29,26 +29,18 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "version_code=$versionCode" >> $GITHUB_OUTPUT
 
-      - name: Get commit messages
-        id: commits
-        run: |
-          COMMITS=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~10)..HEAD)
-          echo "messages<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Create release ZIP
         run: |
-          zip -r magisk-module-v${{ steps.version.outputs.version }}.zip * -x ".git/*" ".github/*" "README.md"
+          zip -r magisk-module-${{ steps.version.outputs.version }}.zip * -x ".git/*" ".github/*" "README.md"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Version ${{ steps.version.outputs.version }} (Code ${{ steps.version.outputs.version_code }})
-          body: ${{ steps.commits.outputs.messages }}
+          body: initial release, check the commit messages for more details
           prerelease: ${{ github.event.inputs.release_type == 'pre-release' }}
           draft: false
-          files: magisk-module-v${{ steps.version.outputs.version }}.zip
+          files: magisk-module-${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
