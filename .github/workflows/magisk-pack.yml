@@ -18,38 +18,38 @@ jobs:
 
         steps:
         - name: Checkout repository
-            uses: actions/checkout@v2
+          uses: actions/checkout@v2
 
         - name: Set up Python
-            uses: actions/setup-python@v2
+          uses: actions/setup-python@v2
             with:
                 python-version: '3.x'
 
         - name: Install zip
-            run: sudo apt-get install zip -y
+          run: sudo apt-get install zip -y
 
         - name: Read version from module.prop
-            id: get_version
-            run: |
+          id: get_version
+          run: |
                 version=$(grep 'version=' module.prop | cut -d'=' -f2)
                 version_code=$(grep 'versionCode=' module.prop | cut -d'=' -f2)
                 echo "::set-output name=version::$version"
                 echo "::set-output name=version_code::$version_code"
 
         - name: Create ZIP package
-            run: zip -r package.zip .
+          run: zip -r package.zip .
 
         - name: Get commit messages
-            id: get_commits
+          id: get_commits
             run: |
                 commits=$(git log --pretty=format:"%h - %s" --no-merges)
                 echo "::set-output name=commits::$commits"
 
         - name: Create GitHub Release
-            uses: actions/create-release@v1
-            env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
+          uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
                 tag_name: v${{ steps.get_version.outputs.version_code }}
                 release_name: v${{ steps.get_version.outputs.version }}
                 body: ${{ steps.get_commits.outputs.commits }}
