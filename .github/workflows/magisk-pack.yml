@@ -34,7 +34,7 @@ jobs:
 
       - name: Create release ZIP
         run: |
-          zip -r magisk-module-${{ steps.version.outputs.version }}.zip * -x ".git/*" ".github/*" "README.md"
+          zip -r magisk-module-${{ steps.version.outputs.version }}.zip . -x ".git/*" ".github/*" "README.md"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
