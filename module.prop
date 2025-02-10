@@ -1,6 +1,6 @@
 id=lowramenabler
 name=启用Android Go
-version=v2.4 Beta
-versionCode=41
+version=v2.4.1 Beta
+versionCode=43
 author=SteveZMT (SteveZMTstudios)
 description=通过修改build.prop来使系统启用低内存优化，同时启用了部分系统优化开关。适用于安卓5以上内存不满1GB的设备。由于会严重破坏体验，内存超过2GB的设备不要刷入。仍处于测试阶段，虽然内置救砖但仍请确保你有救砖能力！
