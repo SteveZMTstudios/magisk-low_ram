@@ -1,10 +1,12 @@
 # magisk-low_ram
 Enable Android Go on your low ram device by installing this module.
 
-## 安装前准备
+## 安装前须知
 
 - 确保您的设备已经Root并且已经安装了最新版的Magisk。
 - 请在安装本模块前备份您的系统。在发生不可预料的问题时，备份能帮助您恢复设备至正常状态。
+- 此模块未必兼容您的设备。
+- 由于本模块会修改系统配置，并且尽可能节省设备内存，因此可能在一些设备上表现异常（如壁纸消失，透明不工作等）。
 
 ## 安装说明
 
